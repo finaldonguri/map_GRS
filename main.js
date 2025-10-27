@@ -5,7 +5,7 @@ Cesium.Ion.defaultAccessToken = Cesium.Ion.defaultAccessToken =
 // Terrainの指定（EGM96、国土数値情報5m標高から生成した全国の地形モデル、5m標高データが無い場所は10m標高で補完している）
 var viewer = new Cesium.Viewer('cesiumContainer', {
     terrainProvider: new Cesium.CesiumTerrainProvider({
-        url: Cesium.IonResource.fromAssetId(2275207),
+        url: Cesium.IonResource.fromAssetId(3830184),
     }),
 });
 
