@@ -16,7 +16,12 @@ var imageProvider = new Cesium.UrlTemplateImageryProvider({
 });
 var current_image = viewer.scene.imageryLayers.addImageryProvider(imageProvider);
 
-
+// 神奈川県横浜市の建物データ（3D Tiles）
+var your_3d_tiles = viewer.scene.primitives.add(
+    new Cesium.Cesium3DTileset({
+        url: 'https://plateau.geospatial.jp/main/data/3d-tiles/bldg/14100_yokohama/low_resolution/tileset.json',
+    })
+);
 // 初期表示時のカメラ位置
 viewer.camera.flyTo({
     destination: Cesium.Cartesian3.fromDegrees(135.7082125, 35.2226905, 10000.0),
