@@ -11,7 +11,7 @@ var viewer = new Cesium.Viewer('cesiumContainer', {
 
 // PLATEAU-Orthoの参照
 var imageProvider = new Cesium.UrlTemplateImageryProvider({
-    url: 'https://gic-plateau.s3.ap-northeast-1.amazonaws.com/2020/ortho/tiles/{z}/{x}/{y}.png',
+    url: 'https://api.plateauview.mlit.go.jp/tiles/plateau-ortho-2023/{z}/{x}/{y}.png',
     maximumLevel: 19,
 });
 var current_image = viewer.scene.imageryLayers.addImageryProvider(imageProvider);
