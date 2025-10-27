@@ -24,5 +24,5 @@ var your_3d_tiles = viewer.scene.primitives.add(
 );
 // 初期表示時のカメラ位置
 viewer.camera.flyTo({
-    destination: Cesium.Cartesian3.fromDegrees(135.7082125, 35.2226905, 1000.0),
+    destination: Cesium.Cartesian3.fromDegrees(135.7082125, 35.2226905, 10000.0),
 });
