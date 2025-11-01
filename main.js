@@ -4,12 +4,18 @@ var viewer = new Cesium.Viewer('cesiumContainer', {
     terrainProvider: Cesium.createWorldTerrain()
 });
 
-// 神奈川県横浜市の建物データ（3D Tiles）
-var your_3d_tiles = viewer.scene.primitives.add(
-    new Cesium.Cesium3DTileset({
-        url: 'https://plateau.geospatial.jp/main/data/3d-tiles/bldg/14100_yokohama/low_resolution/tileset.json',
-    })
+const layer = viewer.imageryLayers.addImageryProvider(
+    await Cesium.IonImageryProvider.fromAssetId(2),
 );
+
+
+viewer.scene.setTerrain(
+    new Cesium.Terrain(
+        Cesium.CesiumTerrainProvider.fromIonAssetId(1),
+    ),
+);
+
+
 
 viewer.camera.flyTo({
     destination: Cesium.Cartesian3.fromDegrees(135.70, 35.22, 10000.0),
