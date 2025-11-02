@@ -21,7 +21,7 @@ Cesium.Ion.defaultAccessToken =
 
 
     viewer.entities.add({
-        position: Cesium.Cartesian3.fromDegrees(135.7082915, 35.2232903),
+        position: Cesium.Cartesian3.fromDegrees(135.7082915, 35.2232903, 330),
         point: {
             pixelSize: 8,
             color: Cesium.Color.RED,
@@ -30,7 +30,7 @@ Cesium.Ion.defaultAccessToken =
             outlineWidth: 2
         },
         label: {
-            text: 'Ginreisou house', 
+            text: 'Ginreisou log cabin', 
             font: '12pt sans-serif',
             style: Cesium.LabelStyle.FILL_AND_OUTLINE,
             fillColor: Cesium.Color.WHITE,
