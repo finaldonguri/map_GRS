@@ -23,14 +23,14 @@ Cesium.Ion.defaultAccessToken =
     viewer.entities.add({
         position: Cesium.Cartesian3.fromDegrees(135.7082915, 35.2232903),
         point: {
-            pixelSize: 15,
+            pixelSize: 12,
             color: Cesium.Color.RED,
             outlineColor: Cesium.Color.WHITE,
             outlineWidth: 2
         },
         label: {
             text: 'Ginreisou house',  // ← ここを好きなテキストに変更できます
-            font: '16pt sans-serif',
+            font: '12pt sans-serif',
             fillColor: Cesium.Color.WHITE,
             outlineColor: Cesium.Color.BLACK,
             outlineWidth: 3
