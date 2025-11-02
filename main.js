@@ -70,10 +70,4 @@ Cesium.Ion.defaultAccessToken =
     } catch (error) {
         console.error('GeoJSON読み込みエラー:', error);
     }
-
-    // 初期表示時のカメラ位置（ルートが読み込まれない場合のフォールバック）
-    // viewer.camera.flyTo({
-    //     destination: Cesium.Cartesian3.fromDegrees(135.7, 35.22, 10000.0),
-    //     duration: 2
-    // });
 })();
