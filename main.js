@@ -26,6 +26,7 @@ Cesium.Ion.defaultAccessToken =
             pixelSize: 8,
             color: Cesium.Color.RED,
             outlineColor: Cesium.Color.WHITE,
+            clampToGround: true,
             outlineWidth: 2
         },
         label: {
