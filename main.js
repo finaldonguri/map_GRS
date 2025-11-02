@@ -6,7 +6,7 @@ Cesium.Ion.defaultAccessToken =
 (async function () {
     // Cesium Viewerの初期化
     const viewer = new Cesium.Viewer("cesiumContainer", {
-        baseLayerPicker: true,
+        baseLayerPicker: false,
         timeline: false,
         animation: false
     });
@@ -36,7 +36,7 @@ Cesium.Ion.defaultAccessToken =
             outlineColor: Cesium.Color.BLACK,
             outlineWidth: 3,
             verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-            pixelOffset: new Cesium.Cartesian2(0, -9),
+            pixelOffset: new Cesium.Cartesian2(0, -9)
         }
     });
 
