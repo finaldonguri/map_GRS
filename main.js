@@ -21,7 +21,7 @@ Cesium.Ion.defaultAccessToken =
 
 
     viewer.entities.add({
-        position: Cesium.Cartesian3.fromDegrees(135.7082915, 35.2232903, 335),
+        position: Cesium.Cartesian3.fromDegrees(135.7082915, 35.2232903, 350),
         point: {
             pixelSize: 8,
             color: Cesium.Color.RED,
