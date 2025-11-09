@@ -90,20 +90,20 @@ Cesium.Ion.defaultAccessToken =
     // 古地図4枚
     const providersOld = [
         new Cesium.UrlTemplateImageryProvider({
-            url: "https://mapwarper.h-gis.jp/maps/tile/845/{z}/{x}/{y}.png", // 熊川
-            credit: new Cesium.Credit("『熊川』五万分一地形圖, 明治26年測図/大正9年修正, https://purl.stanford.edu/cb173fj2995"),
+            url: "https://mapwarper.h-gis.jp/maps/tile/814/{z}/{x}/{y}.png", // 四ッ谷
+            credit: new Cesium.Credit("『四ッ谷』五万分一地形圖, 明治26年測図/大正11年修正, https://purl.stanford.edu/sg892mr4720"),
             minimumLevel: 2,
             maximumLevel: 18,
         }),
         new Cesium.UrlTemplateImageryProvider({
-            url: "https://mapwarper.h-gis.jp/maps/tile/846/{z}/{x}/{y}.png", // 竹生島
-            credit: new Cesium.Credit("『竹生島』五万分一地形圖, 明治26年測図/大正9年修正/昭和7年鉄道補入/昭和26年応急修正, https://purl.stanford.edu/zt128hp6132"),
+            url: "https://mapwarper.h-gis.jp/maps/tile/3547/{z}/{x}/{y}.png", // 『京都西北部』五万分一地形圖
+            credit: new Cesium.Credit("『京都西北部』五万分一地形圖, 作成: 1948, https://www.gsi.go.jp/"),
             minimumLevel: 2,
             maximumLevel: 18,
         }),
         new Cesium.UrlTemplateImageryProvider({
-            url: "https://mapwarper.h-gis.jp/maps/tile/816/{z}/{x}/{y}.png", // 彦根西部
-            credit: new Cesium.Credit("『彦根西部』五万分一地形圖, 明治26年測図/大正9年修正/昭和7年鉄道補入, https://purl.stanford.edu/yn560bk7442"),
+            url: "https://mapwarper.h-gis.jp/maps/tile/3550/{z}/{x}/{y}.png", // 『京都東北部』五万分一地形圖
+            credit: new Cesium.Credit("『京都東北部』五万分一地形圖,  作成: 1947, https://www.gsi.go.jp/"),
             minimumLevel: 2,
             maximumLevel: 18,
         }),
