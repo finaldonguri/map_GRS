@@ -4,12 +4,55 @@ Cesium.Ion.defaultAccessToken =
 
 // 非同期処理を関数でラップ
 (async function () {
+
+    function computeUiScale() {
+        const small = window.matchMedia("(max-width: 600px)").matches;
+        const tiny = window.matchMedia("(max-width: 380px)").matches;
+        let base = 1.0;
+        if (small) base = 1.25;
+        if (tiny) base = 1.4;
+        return base;
+    }
+    let uiScale = computeUiScale();
+    const px = (n) => `${Math.round(n * uiScale)}px`;
+
+    // ラベル/ポイントに一括適用（存在するプロパティのみ触る）
+    function applyCalloutStyle(entity, textFontPxBase = 18) {
+        if (entity.point) {
+            entity.point.pixelSize = Math.round(8 * uiScale);
+            entity.point.outlineWidth = Math.round(2 * uiScale);
+        }
+        if (entity.label) {
+            entity.label.font = `bold ${px(textFontPxBase)} sans-serif`;
+            entity.label.outlineWidth = Math.max(2, Math.round(3 * uiScale));
+            entity.label.pixelOffset = new Cesium.Cartesian2(0, -Math.round(8 * uiScale));
+            entity.label.scaleByDistance = new Cesium.NearFarScalar(
+                300.0, 1.0 * uiScale,
+                8000.0, 0.7 * uiScale
+            );
+        }
+    }
+
     // Cesium Viewerの初期化
     const viewer = new Cesium.Viewer("cesiumContainer", {
         baseLayerPicker: false,
         timeline: false,
-        animation: false
+        animation: false,
+        geocoder: false,
+        homeButton: false,
     });
+
+    // 既定ベースレイヤーを完全に除去（ボタンでの誤動作防止）
+    while (viewer.imageryLayers.length > 0) {
+        viewer.imageryLayers.remove(viewer.imageryLayers.get(0), false);
+    }
+
+    // 任意の見た目
+    viewer.scene.globe.enableLighting = true;
+    viewer.clock.currentTime = Cesium.JulianDate.fromDate(new Date("2024-06-21T12:00:00Z"));
+    viewer.clock.shouldAnimate = false;
+
+    // ここは viewer 初期化の直後・addCallout より上に置く
     function applyCalloutStyle(entity, uiScale = 1.0, textFontPxBase = 18) {
         if (!entity) return;
         if (entity.point) {
@@ -20,20 +63,117 @@ Cesium.Ion.defaultAccessToken =
             entity.label.font = `bold ${Math.round(textFontPxBase * uiScale)}px sans-serif`;
             entity.label.outlineWidth = Math.max(2, Math.round(3 * uiScale));
             entity.label.pixelOffset = new Cesium.Cartesian2(0, -Math.round(8 * uiScale));
-            entity.label.scaleByDistance = new Cesium.NearFarScalar(
-                300.0, 1.0 * uiScale,
-                8000.0, 0.7 * uiScale
-            );
+            entity.label.scaleByDistance = new Cesium.NearFarScalar(300.0, 1.0 * uiScale, 8000.0, 0.7 * uiScale);
         }
     }
 
-    // イメージャリー
-    const imageryProvider = await Cesium.IonImageryProvider.fromAssetId(3830183);
-    viewer.imageryLayers.addImageryProvider(imageryProvider);
-
-    // 地形
+    // ===== 地形 =====
     const terrainProvider = await Cesium.CesiumTerrainProvider.fromIonAssetId(2767062);
     viewer.terrainProvider = terrainProvider;
+
+    // ===== 画像レイヤー定義 =====
+    const layers = viewer.imageryLayers;
+
+    // 衛星（Ion）
+    const satelliteProvider = await Cesium.IonImageryProvider.fromAssetId(3830183);
+
+    // 地理院 標準地図
+    const gsiProvider = new Cesium.UrlTemplateImageryProvider({
+        url: "https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png",
+        credit: new Cesium.Credit(
+            '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">地理院タイル</a>'
+        ),
+        minimumLevel: 2,
+        maximumLevel: 18,
+    });
+
+    // 古地図4枚
+    const providersOld = [
+        new Cesium.UrlTemplateImageryProvider({
+            url: "https://mapwarper.h-gis.jp/maps/tile/845/{z}/{x}/{y}.png", // 熊川
+            credit: new Cesium.Credit("『熊川』五万分一地形圖, 明治26年測図/大正9年修正, https://purl.stanford.edu/cb173fj2995"),
+            minimumLevel: 2,
+            maximumLevel: 18,
+        }),
+        new Cesium.UrlTemplateImageryProvider({
+            url: "https://mapwarper.h-gis.jp/maps/tile/846/{z}/{x}/{y}.png", // 竹生島
+            credit: new Cesium.Credit("『竹生島』五万分一地形圖, 明治26年測図/大正9年修正/昭和7年鉄道補入/昭和26年応急修正, https://purl.stanford.edu/zt128hp6132"),
+            minimumLevel: 2,
+            maximumLevel: 18,
+        }),
+        new Cesium.UrlTemplateImageryProvider({
+            url: "https://mapwarper.h-gis.jp/maps/tile/816/{z}/{x}/{y}.png", // 彦根西部
+            credit: new Cesium.Credit("『彦根西部』五万分一地形圖, 明治26年測図/大正9年修正/昭和7年鉄道補入, https://purl.stanford.edu/yn560bk7442"),
+            minimumLevel: 2,
+            maximumLevel: 18,
+        }),
+        new Cesium.UrlTemplateImageryProvider({
+            url: "https://mapwarper.h-gis.jp/maps/tile/815/{z}/{x}/{y}.png", // 北小松
+            credit: new Cesium.Credit("『北小松』五万分一地形圖, 明治26年測図/大正9年修正/昭和7年鉄道補入, https://purl.stanford.edu/hf547qg6944"),
+            minimumLevel: 2,
+            maximumLevel: 18,
+        }),
+    ];
+
+    // レイヤーを一度だけ追加して参照保持
+    const layerSatellite = layers.addImageryProvider(satelliteProvider); // 衛星
+    const layerGSI = layers.addImageryProvider(gsiProvider); // 地理院
+
+    const layerOlds = providersOld.map((p) => layers.addImageryProvider(p)); // 古地図4枚
+
+    // 見た目調整（任意）
+    [layerSatellite, layerGSI, ...layerOlds].forEach((l) => {
+        l.alpha = 1.0;
+        l.brightness = 0.95;
+    });
+
+    // まず全OFF → 衛星のみON
+    function allOff() {
+        layerSatellite.show = false;
+        layerGSI.show = false;
+        layerOlds.forEach((l) => (l.show = false));
+    }
+    allOff();
+    layerSatellite.show = true;
+
+    // 排他的切替
+    function showSatellite() {
+        allOff();
+        layerSatellite.show = true;
+        layers.lowerToBottom(layerSatellite);
+        setActive("btn-satellite");
+    }
+    function showGSI() {
+        allOff();
+        layerGSI.show = true;
+        layers.lowerToBottom(layerGSI);
+        setActive("btn-gsi");
+    }
+    function showOldMaps() {
+        allOff();
+        layerOlds.forEach((l) => (l.show = true));
+        layers.raiseToTop(layerOlds[layerOlds.length - 1]);
+        setActive("btn-old");
+    }
+
+    // アクティブ状態（任意・見た目用）
+    function setActive(id) {
+        const ids = ["btn-gsi", "btn-satellite", "btn-old"];
+        ids.forEach((x) => {
+            const el = document.getElementById(x);
+            if (el) el.classList.toggle("active", x === id);
+        });
+    }
+
+    // ボタンにイベント付与（存在する場合のみ）
+    const btnSat = document.getElementById("btn-satellite");
+    const btnGsi = document.getElementById("btn-gsi");
+    const btnOld = document.getElementById("btn-old");
+    if (btnSat) btnSat.onclick = showSatellite;
+    if (btnGsi) btnGsi.onclick = showGSI;
+    if (btnOld) btnOld.onclick = showOldMaps;
+    setActive("btn-satellite");
+
 
     // ================================
     // addCallout 関数の開始
@@ -41,7 +181,7 @@ Cesium.Ion.defaultAccessToken =
     async function addCallout(viewer, lon, lat, lift, text) {
         const uiScale = 1.0;
 
-        // 地形高を取得して地面高さに合わせる
+        // 地形高を取得（0m 固定だと地面の下に潜る場合がある）
         const carto = Cesium.Cartographic.fromDegrees(lon, lat);
         const [updated] = await Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, [carto]);
         const groundH = (updated && updated.height) || 0;
@@ -49,13 +189,15 @@ Cesium.Ion.defaultAccessToken =
         const groundPos = Cesium.Cartesian3.fromDegrees(lon, lat, groundH);
         const airPos = Cesium.Cartesian3.fromDegrees(lon, lat, groundH + lift);
 
-        // 引き出し線（地面→空中）
+        // 引出線（地面→空中）
         viewer.entities.add({
             polyline: {
                 positions: [groundPos, airPos],
                 width: 2,
                 material: Cesium.Color.BLUE.withAlpha(0.9),
-                clampToGround: false, // 垂直線なのでfalse
+                // 地形で隠れたときも同じ見た目で描く（任意だが見失いにくい）
+                depthFailMaterial: Cesium.Color.BLUE.withAlpha(0.9),
+                clampToGround: false, // 垂直線なので false
             },
         });
 
@@ -67,6 +209,8 @@ Cesium.Ion.defaultAccessToken =
                 color: Cesium.Color.RED,
                 outlineColor: Cesium.Color.WHITE,
                 outlineWidth: Math.round(2 * uiScale),
+                // 地面の下に潜らないよう、必要なら:
+                // disableDepthTestDistance: Number.POSITIVE_INFINITY
             },
         });
 
@@ -82,7 +226,7 @@ Cesium.Ion.defaultAccessToken =
                 outlineWidth: Math.max(2, Math.round(3 * uiScale)),
                 verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
                 pixelOffset: new Cesium.Cartesian2(0, -Math.round(8 * uiScale)),
-                disableDepthTestDistance: Number.POSITIVE_INFINITY,
+                disableDepthTestDistance: Number.POSITIVE_INFINITY, // ラベルは常に見える
                 scaleByDistance: new Cesium.NearFarScalar(300.0, 1.0 * uiScale, 8000.0, 0.7 * uiScale),
             },
         });
@@ -90,7 +234,6 @@ Cesium.Ion.defaultAccessToken =
         applyCalloutStyle(pt, uiScale);
         applyCalloutStyle(lb, uiScale);
     }
-
     // ================================
     // addCallout 関数の終了
     // ================================
@@ -104,6 +247,7 @@ Cesium.Ion.defaultAccessToken =
     for (const p of calloutPoints) {
         await addCallout(viewer, p.lon, p.lat, p.lift, p.text);
     }
+
 
     // カメラ移動
     await viewer.flyTo(viewer.entities, { duration: 2 });
